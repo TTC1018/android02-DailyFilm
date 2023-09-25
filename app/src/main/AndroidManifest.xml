@@ -48,10 +48,7 @@
             android:exported="false"
             android:theme="@style/Theme.DailyFilm"/>
         <activity
-            android:name=".presentation.uploadfilm.UploadFilmActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.login.LoginComposeActivity"
+            android:name=".presentation.DailyFilmActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
