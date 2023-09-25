@@ -1,15 +1,11 @@
 package com.boostcamp.dailyfilm.presentation.login
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,8 +24,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +38,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boostcamp.dailyfilm.R
 import com.boostcamp.dailyfilm.presentation.calendar.CalendarActivity
@@ -48,87 +47,96 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.material.snackbar.Snackbar
-import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
-class LoginComposeActivity : ComponentActivity() {
-    private val viewModel by viewModels<LoginViewModel>()
-    private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail().build()
-        val client = GoogleSignIn.getClient(this, options)
-
-        activityResultLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result: ActivityResult ->
-            if (result.resultCode == RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    viewModel.requestLogin(account.idToken!!)
-                } catch (e: ApiException) {
-                    showSnackBarMessage(this, getString(R.string.failed_google_login))
+@Composable
+fun rememberSignInResultLauncher(
+    requestLogin: (String) -> Unit,
+    onShowSnackbar: suspend (String) -> Unit,
+    coroutineScope: CoroutineScope,
+): ActivityResultLauncher<Intent> {
+    val errorMsg = stringResource(R.string.failed_google_login)
+    return rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                requestLogin(account.idToken!!)
+            } catch (e: ApiException) {
+                coroutineScope.launch {
+                    onShowSnackbar(errorMsg)
                 }
             }
         }
-        setContent {
-            LoginUI(viewModel, client, activityResultLauncher)
-        }
     }
 }
 
 @Composable
-fun LoginUI(
-    viewModel: LoginViewModel,
-    client: GoogleSignInClient,
-    activityResultLauncher: ActivityResultLauncher<Intent>
+fun LoginRoute(
+    modifier: Modifier = Modifier,
+    onLogin: () -> Unit,
+    onShowSnackbar: suspend (String) -> Unit,
+    coroutineScope: CoroutineScope,
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val activity = LocalContext.current as Activity
-
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    var isLoading by rememberSaveable {
-        mutableStateOf(false)
+    val webClientId = stringResource(R.string.default_web_client_id)
+    val options = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
+            .build()
     }
-    LoginView(client, activityResultLauncher)
-    ProgressLoading(isLoading = isLoading)
-    when (val result = uiState.value.getContentIfNotHandled()) {
-        is UiState.Uninitialized -> {
-            autoLogin(activity)
-        }
+    val client = remember { GoogleSignIn.getClient(activity, options) }
+    val activityResultLauncher = rememberSignInResultLauncher(
+        viewModel::requestLogin,
+        onShowSnackbar,
+        coroutineScope
+    )
 
-        is UiState.Loading -> {
-            isLoading = true
-        }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var isLoading by rememberSaveable { mutableStateOf(false) }
 
-        is UiState.Success -> {
-            isLoading = false
-            activity.startActivity(
-                Intent(
-                    LocalContext.current,
-                    CalendarActivity::class.java
-                )
-            )
-            activity.finish()
-        }
-
-        is UiState.Failure -> {
-            isLoading = false
-            result.throwable.message?.let {
-                showSnackBarMessage(activity, it)
+    LaunchedEffect(uiState) {
+        when (val result = uiState.getContentIfNotHandled()) {
+            is UiState.Uninitialized -> {
+                autoLogin(activity)
             }
-        }
 
-        else -> {}
+            is UiState.Loading -> {
+                isLoading = true
+            }
+
+            is UiState.Success -> {
+                isLoading = false
+                onLogin()
+            }
+
+            is UiState.Failure -> {
+                isLoading = false
+                result.throwable.message?.let {
+                    onShowSnackbar(it)
+                }
+            }
+
+            else -> {}
+        }
     }
+
+    LoginScreen(
+        modifier = modifier,
+        client = client,
+        activityResultLauncher = activityResultLauncher
+    )
+    ProgressLoading(isLoading = isLoading)
 }
 
 @Composable
-private fun LoginView(
+private fun LoginScreen(
+    modifier: Modifier = Modifier,
     client: GoogleSignInClient,
     activityResultLauncher: ActivityResultLauncher<Intent>
 ) {
@@ -142,7 +150,9 @@ private fun LoginView(
     } else {
         colorResource(id = R.color.dark_gray)
     }
-    Column {
+    Column(
+        modifier = modifier.fillMaxSize(),
+    ) {
         Logo()
         LoginButton(activityResultLauncher, client, backgroundColor, contentsColor)
     }
@@ -221,8 +231,4 @@ private fun autoLogin(content: Activity) {
         content.startActivity(Intent(content, CalendarActivity::class.java))
         content.finish()
     }
-}
-
-private fun showSnackBarMessage(context: Activity, message: String) {
-    Snackbar.make(context.findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
 }

@@ -35,8 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boostcamp.dailyfilm.R
-import com.boostcamp.dailyfilm.presentation.login.LoginActivity
-import com.boostcamp.dailyfilm.presentation.login.LoginComposeActivity
+import com.boostcamp.dailyfilm.presentation.DailyFilmActivity
 import com.boostcamp.dailyfilm.presentation.settings.SettingsEvent
 import com.boostcamp.dailyfilm.presentation.settings.SettingsViewModel
 import com.boostcamp.dailyfilm.presentation.ui.theme.DailyFilmTheme
@@ -213,7 +212,7 @@ fun navigateToLogin(context: Context) {
     context.startActivity(
         Intent(
             context,
-            LoginComposeActivity::class.java,
+            DailyFilmActivity::class.java, // TODO 추후 Navigation Compose에 통합
         ).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         },
