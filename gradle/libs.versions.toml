@@ -42,6 +42,7 @@ paging = "3.2.1"
 playServicesAuth = "20.7.0"
 room = "2.7.1"
 desugar-jdk-libs = "2.1.5"
+kotlinxSerializationJson = "1.8.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -103,6 +104,7 @@ mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref =
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 androidx-navigation-safe-args-gradle-plugin = { group = "androidx.navigation", name = "navigation-safe-args-gradle-plugin", version.ref = "navigationSafeArgsGradlePlugin" }
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar-jdk-libs" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 # for build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -124,12 +126,14 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 dailyfilm-android-application = { id = "dailyfilm.android.application", version = "unspecified" }
 dailyfilm-android-compose = { id = "dailyfilm.android.compose", version = "unspecified" }
 dailyfilm-android-kotlin = { id = "dailyfilm.android.kotlin", version = "unspecified" }
 dailyfilm-android-library = { id = "dailyfilm.android.library", version = "unspecified" }
 dailyfilm-jvm-library = { id = "dailyfilm.jvm.library", version = "unspecified" }
+dailyfilm-kotlin-serialization = { id = "dailyfilm.kotlin.serialization", version = "unspecified" }
 
 [bundles]
 

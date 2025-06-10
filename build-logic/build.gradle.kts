@@ -60,5 +60,9 @@ gradlePlugin {
             id = "dailyfilm.jvm.library"
             implementationClass = "$path.primitive.JvmLibraryPlugin"
         }
+        register("serialization") {
+            id = "dailyfilm.kotlin.serialization"
+            implementationClass = "$path.primitive.SerializationPlugin"
+        }
     }
 }
