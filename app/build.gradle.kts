@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.dailyfilm.android.application)
     alias(libs.plugins.dailyfilm.android.compose)
     alias(libs.plugins.dailyfilm.android.kotlin)
+    alias(libs.plugins.dailyfilm.kotlin.serialization)
     alias(libs.plugins.androidx.navigation.safeargs)
     alias(libs.plugins.google.services)
     alias(libs.plugins.hilt)

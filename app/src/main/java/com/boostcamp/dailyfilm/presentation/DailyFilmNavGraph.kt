@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.boostcamp.dailyfilm.presentation.calendar.CalendarRoute
 import com.boostcamp.dailyfilm.presentation.login.LoginRoute
 import kotlinx.coroutines.CoroutineScope
@@ -21,31 +22,32 @@ fun DailyFilmNavGraph(
     startDestination: String = DailyFilmDestinations.LOGIN_ROUTE
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
-        startDestination = startDestination
+        startDestination = DailyFilmDestination.DailyFilmRoute
     ) {
-        composable(
-            route = DailyFilmDestinations.LOGIN_ROUTE,
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
+        navigation<DailyFilmDestination.DailyFilmRoute>(
+            startDestination = DailyFilmDestination.Login,
         ) {
-            LoginRoute(
-                onShowSnackBar = onShowSnackBar,
-                navigateToCalendar = navActions.navigateToCalendar,
-                coroutineScope = coroutineScope,
-                modifier = modifier
-            )
-        }
+            composable<DailyFilmDestination.Login>(
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() }
+            ) {
+                LoginRoute(
+                    onShowSnackBar = onShowSnackBar,
+                    navigateToCalendar = navActions.navigateToCalendar,
+                    coroutineScope = coroutineScope,
+                )
+            }
 
-        composable(
-            route = DailyFilmDestinations.CALENDAR_ROUTE,
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
-        ) {
-            CalendarRoute(
-                coroutineScope = coroutineScope,
-                modifier = modifier
-            )
+            composable<DailyFilmDestination.Calendar>(
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() }
+            ) {
+                CalendarRoute(
+                    coroutineScope = coroutineScope,
+                )
+            }
         }
     }
 }

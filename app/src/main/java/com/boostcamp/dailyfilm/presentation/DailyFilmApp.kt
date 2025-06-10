@@ -19,6 +19,7 @@ fun DailyFilmApp(
     val coroutineScope = rememberCoroutineScope()
 
     DailyFilmNavGraph(
+        modifier = modifier,
         navController = navController,
         navActions = navActions,
         onShowSnackBar = { message -> snackBarHostState.showSnackbar(message) },
