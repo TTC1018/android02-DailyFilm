@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "DailyFilm"
 include(":app")
 include(":core:video-trimmer")
+include(":core:mvi")

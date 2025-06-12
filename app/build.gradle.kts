@@ -62,6 +62,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.mvi)
+
     implementation(libs.androidx.compose.material)
     // Optional - Integration with ViewModels
     implementation(libs.androidx.lifecycle.viewmodel.compose)
