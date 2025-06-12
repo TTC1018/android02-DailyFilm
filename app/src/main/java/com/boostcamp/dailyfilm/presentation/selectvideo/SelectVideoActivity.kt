@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.boostcamp.dailyfilm.R
@@ -117,19 +118,10 @@ class SelectVideoActivity :
 
     private fun setObserveUserEvent() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventFlow.collectLatest { event ->
-                    when (event) {
-                        is SelectVideoEvent.NextButtonResult -> {
-                            moveToTrimVideo(event.dateAndVideoModelItem)
-                        }
-                        is SelectVideoEvent.BackButtonResult -> {
-                            finish()
-                        }
-                        is SelectVideoEvent.ControlSoundResult -> {
-                            controlSound(event.result)
-                        }
-                    }
+            viewModel.sideEffect.flowWithLifecycle(lifecycle).collect { effect ->
+                when (effect) {
+                    SelectVideoSideEffect.LoadVideos -> viewModel.loadVideo()
+                    // TODO TrimVideo 이동 추가
                 }
             }
         }
@@ -157,7 +149,7 @@ class SelectVideoActivity :
                     putExtra(DATE_VIDEO_ITEM, item)
                     putExtra(KEY_CALENDAR_INDEX, viewModel.calendarIndex)
                     putExtra(KEY_EDIT_STATE, viewModel.editState)
-                    putExtra(KEY_DATE_MODEL, viewModel.dateModel)
+//                    putExtra(KEY_DATE_MODEL, viewModel.dateModel)
                     putExtra(FLAG_FROM_VIEW, "gallery")
                 }
             )

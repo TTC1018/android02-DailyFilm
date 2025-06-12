@@ -89,7 +89,7 @@
                     android:layout_height="500dp"
                     android:minHeight="300dp"
                     app:layout_collapseMode="parallax"
-                    app:playVideo="@{viewModel.selectedVideo.uri}"
+                    app:playVideo="@{viewModel.uiState.selectedVideo.uri}"
                     app:resize_mode="zoom"
                     app:use_controller="false" />
 

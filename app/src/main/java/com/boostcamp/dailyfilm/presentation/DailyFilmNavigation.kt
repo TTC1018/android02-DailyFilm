@@ -3,6 +3,9 @@ package com.boostcamp.dailyfilm.presentation
 import androidx.navigation.NavHostController
 import kotlinx.serialization.Serializable
 import com.boostcamp.dailyfilm.presentation.DailyFilmDestination.*
+import com.boostcamp.dailyfilm.presentation.calendar.model.DateModel
+import com.boostcamp.dailyfilm.presentation.playfilm.model.EditState
+import com.boostcamp.dailyfilm.presentation.selectvideo.DateNavigationModel
 
 object DailyFilmDestinations {
     const val LOGIN_ROUTE = "login"
@@ -18,6 +21,13 @@ internal sealed interface DailyFilmDestination {
 
     @Serializable
     data object Calendar : DailyFilmDestination
+
+    @Serializable
+    data class SelectVideo(
+        val dateModel: DateNavigationModel,
+        val calendarIndex: Int,
+        val editState: EditState,
+    ) : DailyFilmDestination
 }
 
 class DailyFilmNavigationActions(navController: NavHostController) {
